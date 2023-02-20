@@ -5,7 +5,11 @@ const { Configuration, OpenAIApi } = require("openai");
 
 const app = express();
 const port = process.env.PORT || 3000;
-const client = new Client();
+const client = new Client({
+    puppeteer: {
+        args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    },
+});
 let openaiApiKey = process.env.OPENAI_API_KEY;
 let qrReceived = "-";
 
