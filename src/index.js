@@ -22,6 +22,17 @@ app.get("/qrcode", async (req, res) => {
     }
 });
 
+setInterval(async () => {
+    client
+        .getState()
+        .then((status) => {
+            console.log("Status:", status);
+        })
+        .catch((err) => {
+            console.error("Failed to get actual state:", err);
+        });
+}, 30000);
+
 function generateQRCode(text) {
     return new Promise((resolve, reject) => {
         QRCode.toDataURL(text, (err, url) => {
@@ -48,6 +59,15 @@ client.on("ready", () => {
     console.log("Client is ready!");
 });
 
+client.on("change_state", (state) => {
+    console.log("Chage State:", state);
+});
+
+client.on("disconnected", (reason) => {
+    console.log("Client is offline:", reason);
+    client.initialize();
+});
+
 client.on("message_create", async (message) => {
     if (message.fromMe) {
         const params = isCommandAndExtractParams(message.body);
@@ -58,9 +78,14 @@ client.on("message_create", async (message) => {
         if (params.command === "/help") {
             client.sendMessage(
                 message.from,
-                "*Set OPENAI_API_KEY*\n /key [OPENAI_API_KEY]\n\n" +
-                    "*Set API (soon)*\n /set [number of API]\n\n" +
-                    "*Official API*\n /gpt [query]"
+                `*Set OPENAI_API_KEY*
+                 /key [OPENAI_API_KEY]
+                
+                 *Consult the official API*
+                 /gpt [query]
+
+                *Set API (soon)*
+                 /set [number of API]`
             );
             return;
         }
