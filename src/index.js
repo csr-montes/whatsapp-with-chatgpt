@@ -15,7 +15,11 @@ let qrReceived = "-";
 
 app.get("/qrcode", async (req, res) => {
     try {
-        let qrCodeUrl = await generateQRCode(qrReceived);
+        const qrCodeUrl = await QRCode.toDataURL(qrReceived)
+            .then((url) => url)
+            .catch((err) => {
+                console.error(err);
+            });
         res.send(`<img src="${qrCodeUrl}">`);
     } catch (error) {
         res.status(500).send("Error generating QR code");
@@ -32,18 +36,6 @@ setInterval(async () => {
             console.error("Failed to get actual state:", err);
         });
 }, 30000);
-
-function generateQRCode(text) {
-    return new Promise((resolve, reject) => {
-        QRCode.toDataURL(text, (err, url) => {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(url);
-            }
-        });
-    });
-}
 
 app.listen(port);
 console.log("Server on port", port);
